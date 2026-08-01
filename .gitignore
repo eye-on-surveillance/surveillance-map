@@ -53,3 +53,6 @@ nola_cameras/static/css/main.css
 
 # Containers
 *.tar
+
+# Worktrees
+.worktrees/
