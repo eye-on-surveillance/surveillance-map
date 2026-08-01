@@ -4,9 +4,12 @@ Views for camera mapping application.
 
 import uuid
 
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django.urls import reverse_lazy
+from django.utils.decorators import method_decorator
 from django.views.generic import FormView, TemplateView
+from django_ratelimit.decorators import ratelimit
 
 from .forms import CameraReportForm, CorrectionProposalForm, PhotoProposalForm
 from .models import AboutSection, Announcement, Camera, CameraImage, CorrectionProposal
@@ -69,6 +72,7 @@ class MapView(TemplateView):
         return context
 
 
+@method_decorator(ratelimit(key="ip", rate="10/h", method="POST", block=False), name="post")
 class CameraReportView(FormView):
     """
     Public form for submitting new camera sightings.
@@ -77,6 +81,11 @@ class CameraReportView(FormView):
     template_name = "report.html"
     form_class = CameraReportForm
     success_url = reverse_lazy("report-success")
+
+    def post(self, request, *args, **kwargs):
+        if getattr(request, "limited", False):
+            return HttpResponse("Too many submissions. Please try again later.", status=429)
+        return super().post(request, *args, **kwargs)
 
     def get_template_names(self):
         ua = self.request.META.get("HTTP_USER_AGENT", "").lower()
@@ -126,6 +135,7 @@ class ReportSuccessView(TemplateView):
     template_name = "report_success.html"
 
 
+@method_decorator(ratelimit(key="ip", rate="20/h", method="POST", block=False), name="post")
 class ProposePhotoView(FormView):
     """
     Public form to propose a photo for an existing vetted camera.
@@ -137,6 +147,11 @@ class ProposePhotoView(FormView):
     def setup(self, request, *args, **kwargs):
         super().setup(request, *args, **kwargs)
         self.camera = get_object_or_404(Camera, pk=kwargs["camera_id"], status=Camera.Status.VETTED)
+
+    def post(self, request, *args, **kwargs):
+        if getattr(request, "limited", False):
+            return HttpResponse("Too many submissions. Please try again later.", status=429)
+        return super().post(request, *args, **kwargs)
 
     def get_success_url(self):
         return reverse_lazy("propose-photo-success", kwargs={"camera_id": self.camera.pk})
@@ -166,6 +181,7 @@ class ProposePhotoSuccessView(TemplateView):
         return context
 
 
+@method_decorator(ratelimit(key="ip", rate="10/h", method="POST", block=False), name="post")
 class ProposeCorrectionView(FormView):
     """
     Public form to propose a correction for an existing vetted camera.
@@ -177,6 +193,11 @@ class ProposeCorrectionView(FormView):
     def setup(self, request, *args, **kwargs):
         super().setup(request, *args, **kwargs)
         self.camera = get_object_or_404(Camera, pk=kwargs["camera_id"], status=Camera.Status.VETTED)
+
+    def post(self, request, *args, **kwargs):
+        if getattr(request, "limited", False):
+            return HttpResponse("Too many submissions. Please try again later.", status=429)
+        return super().post(request, *args, **kwargs)
 
     def get_success_url(self):
         return reverse_lazy("propose-correction-success", kwargs={"camera_id": self.camera.pk})
