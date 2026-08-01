@@ -1,7 +1,5 @@
 # Contributing
 
-Thank you for your interest in the New Orleans surveillance mapping project.
-
 ## Getting started
 
 1. Fork the repository and clone your fork
