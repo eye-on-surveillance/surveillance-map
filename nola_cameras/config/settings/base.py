@@ -143,3 +143,8 @@ CSRF_TRUSTED_ORIGINS = os.environ.get(
     "CSRF_TRUSTED_ORIGINS",
     "http://localhost:8000,http://127.0.0.1:8000"
 ).split(",")
+
+# Django's default ("same-origin") omits the Referer on cross-origin requests,
+# and OSM's tile servers block referer-less tile fetches. This sends only the
+# origin cross-site (never the path), which satisfies OSM's tile usage policy.
+SECURE_REFERRER_POLICY = "strict-origin-when-cross-origin"

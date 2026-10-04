@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block title %}Report a Camera - New Orleans surveillance map{% endblock %}
 
@@ -289,6 +290,7 @@
 {% endblock %}
 
 {% block extra_js %}
+<script src="{% static 'js/basemap.js' %}"></script>
 <script>
 const REPORT_MAP_CONFIG = {
     lat: {{ init_lat }},
@@ -316,10 +318,7 @@ function reportForm() {
             const cfg = REPORT_MAP_CONFIG;
             this.map = L.map('location-map').setView([cfg.lat, cfg.lng], cfg.zoom);
 
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                maxZoom: 19,
-                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-            }).addTo(this.map);
+            addBasemap(this.map);
 
             if (cfg.pinned) {
                 this.setLocation(cfg.lat, cfg.lng);

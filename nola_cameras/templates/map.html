@@ -156,7 +156,7 @@
 </nav>
 
 <!-- Map Container -->
-<div x-data="cameraMap()" x-init="init()" class="relative" style="margin-top: 56px;">
+<div x-data="cameraMap()" class="relative" style="margin-top: 56px;">
     <!-- Loading Overlay -->
     <div x-show="loading" class="loading-overlay">
         <div class="flex flex-col items-center">
@@ -447,14 +447,10 @@
     </div>
 </div>
 
-<script>
-document.getElementById('filter-toggle').addEventListener('click', function() {
-    Alpine.store('map')?.toggleFilters?.() || document.querySelector('[x-data]').__x.$data.showFilters = !document.querySelector('[x-data]').__x.$data.showFilters;
-});
-</script>
 {% endblock %}
 
 {% block extra_js %}
+<script src="{% static 'js/basemap.js' %}"></script>
 <script>
 document.addEventListener('alpine:init', () => {
     Alpine.store('viewport', {
@@ -572,12 +568,7 @@ function cameraMap() {
             // Initialize map centered on New Orleans
             this.map = L.map('map').setView([29.9511, -90.0715], 12);
 
-            // Add map tiles (Carto Voyager — production-safe, OSM data)
-            L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-                maxZoom: 19,
-                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
-                subdomains: 'abcd',
-            }).addTo(this.map);
+            addBasemap(this.map);
 
             // Initialize per-type marker cluster groups
             const TYPES = CAMERA_TYPES;
